@@ -135,6 +135,20 @@ const OPTION_DEFS = [
 	  desc: 'disable auto-update' },
 	{ long: '--no-silent-update',  helpOnly: true,
 	  desc: 'prompt before downloading updates instead of updating silently' },
+	{ long: '--mcp',  helpOnly: true,
+	  desc: 'run the MCP server so AI clients can read, edit and export diagrams (stdio transport by default)' },
+	{ long: '--mcp-transport',  helpOnly: true,
+	  desc: 'MCP transport: stdio (default) or http' },
+	{ long: '--mcp-port',  helpOnly: true,
+	  desc: 'MCP HTTP port (default: 8890)' },
+	{ long: '--mcp-host',  helpOnly: true,
+	  desc: 'MCP HTTP bind host (default: 127.0.0.1)' },
+	{ long: '--mcp-readonly',  helpOnly: true,
+	  desc: 'disable every mutating MCP tool (read, validate, export, review only)' },
+	{ long: '--mcp-allow',  helpOnly: true,
+	  desc: 'allow a directory for MCP file access (repeatable)' },
+	{ long: '--mcp-autocommit',  helpOnly: true,
+	  desc: 'commit staged diagram changes immediately (skips the write-review approval step)' },
 ];
 
 const SHORT_MAP = new Map(OPTION_DEFS.filter(d => d.short && !d.helpOnly).map(d => [d.short, d]));

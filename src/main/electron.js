@@ -17,6 +17,8 @@ import ProgressBar from './progress-bar.js';
 import contextMenu from 'electron-context-menu';
 import {spawn, exec} from 'child_process';
 import {disableUpdate as disUpPkg} from './disableUpdate.js';
+import {detectMcpConfig} from './mcp/config.js';
+import {runMcpServer} from './mcp/runner.js';
 
 let store;
 
@@ -159,6 +161,41 @@ const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 if (process.argv.indexOf('--disable-acceleration') !== -1)
 {
 	app.disableHardwareAcceleration();
+}
+
+// MCP server mode (--mcp): run headless — no windows, no GPU. The desktop GUI
+// path below is skipped entirely; see the early return in app.whenReady().
+let mcpConfig = null;
+
+try
+{
+	mcpConfig = detectMcpConfig(process.argv);
+}
+catch (e)
+{
+	console.error('Invalid --mcp options:', e.message);
+}
+
+if (mcpConfig)
+{
+	app.disableHardwareAcceleration();
+	app.commandLine.appendSwitch('disable-gpu');
+
+	// Root (CI/Docker) cannot use Chromium's sandbox; needed to start at all.
+	if (process.platform === 'linux')
+	{
+		try
+		{
+			if (typeof process.getuid === 'function' && process.getuid() === 0)
+			{
+				app.commandLine.appendSwitch('no-sandbox');
+			}
+		}
+		catch (e)
+		{
+			// fall through
+		}
+	}
 }
 
 // Configure context menu for text fields
@@ -636,6 +673,21 @@ function createWindow (opt = {})
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() =>
 {
+	// MCP server mode: serve the Model Context Protocol instead of the GUI so
+	// AI clients can read, edit (with write review) and export diagrams. Starts
+	// before any window, session or IPC setup and keeps the process alive via
+	// the stdio transport (or an HTTP listener).
+	if (mcpConfig)
+	{
+		runMcpServer({ ...mcpConfig, appPath: app.getAppPath() }).catch(e =>
+		{
+			console.error('Failed to start MCP server:', e);
+			app.exit(1);
+		});
+
+		return;
+	}
+
 	// Determine initial defaultAdaptiveColors for the drawio Configuration
 	// before any window is created so the value is passed to the preload.
 	initialAdaptiveColorsDefault = detectInitialAdaptiveColorsDefault();
