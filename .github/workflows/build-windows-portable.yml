@@ -1,0 +1,59 @@
+name: Build Windows x64 Portable
+
+# Builds an unsigned, install-free Windows x64 package (a single portable .exe
+# plus a green zip) for personal forks. Unlike the official tag-triggered
+# workflows it needs no private drawio-dev repository and no signing secrets:
+# it uses the public drawio submodule and skips code signing (DRAWIO_UNSIGNED).
+#
+# Triggers:
+#   - push to dev (auto-build on every push)
+#   - manual run (Actions -> "Build Windows x64 Portable" -> Run workflow)
+#
+# Artifacts are attached to the workflow run under "drawio-windows-x64-portable".
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - dev
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      DRAWIO_UNSIGNED: 'true'
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+          persist-credentials: false
+
+      - name: Installing Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Build portable x64
+        run: |
+          npm ci
+          # disableUpdate stops the app replacing itself with the official
+          # (unmodified) release via auto-update
+          npm run sync -- disableUpdate
+          npx electron-builder --config electron-builder-win-portable.json --publish never
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: drawio-windows-x64-portable
+          path: |
+            dist/*.exe
+            dist/*.zip
+          if-no-files-found: error

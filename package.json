@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:jgraph/drawio-desktop.git"
+    "url": "https://github.com/pk250/drawio-desktop.git"
   },
   "keywords": [
     "draw.io",
@@ -32,9 +32,9 @@
   "author": "JGraph <support@draw.io>",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/jgraph/drawio-desktop/issues"
+    "url": "https://github.com/pk250/drawio-desktop/issues"
   },
-  "homepage": "https://github.com/jgraph/drawio",
+  "homepage": "https://github.com/pk250/drawio-desktop",
   "dependencies": {
     "@cantoo/pdf-lib": "^2.7.3",
     "@modelcontextprotocol/sdk": "^1.30.0",

@@ -1,0 +1,61 @@
+{
+  "appId": "com.jgraph.drawio.desktop",
+  "copyright": "Copyright 2017-2026 draw.io Ltd",
+  "asar": true,
+  "files": [
+    "**/*",
+    "!**/WEB-INF{,/**}"
+  ],
+  "directories": {
+    "output": "./dist/"
+  },
+  "npmRebuild": false,
+  "publish": {
+      "provider": "github"
+  },
+  "win": {
+    "artifactName": "${productName}-${version}-windows-x64.${ext}",
+    "target": [
+      {
+        "target": "portable",
+        "arch": [
+          "x64"
+        ]
+      },
+      {
+        "target": "zip",
+        "arch": [
+          "x64"
+        ]
+      }
+    ]
+  },
+  "portable": {
+    "artifactName": "${productName}-${version}-windows-portable.${ext}",
+    "requestExecutionLevel": "user"
+  },
+  "afterPack": "build/fuses.mjs",
+  "fileAssociations": [
+	  {
+	  	"ext": "drawio",
+	  	"name": "draw.io Diagram",
+	  	"description": "draw.io Diagram",
+	  	"mimeType": "application/vnd.jgraph.mxfile",
+	  	"role": "Editor"
+	  },
+	  {
+	  	"ext": "vsdx",
+	  	"name": "VSDX Document",
+	  	"description": "VSDX Document",
+	  	"mimeType": "application/vnd.visio",
+	  	"role": "Editor"
+	  },
+	  {
+	  	"ext": ["mmd", "mermaid"],
+	  	"name": "Mermaid Diagram",
+	  	"description": "Mermaid Diagram",
+	  	"mimeType": "text/vnd.mermaid",
+	  	"role": "Editor"
+	  }
+  ]
+}

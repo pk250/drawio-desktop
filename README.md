@@ -3,14 +3,14 @@ About
 
 **drawio-desktop** is a diagramming desktop app based on [Electron](https://electronjs.org/) that wraps the [core draw.io editor](https://github.com/jgraph/drawio).
 
-Download built binaries from the [releases section](https://github.com/jgraph/drawio-desktop/releases).
+Download built binaries from the [releases section](https://github.com/pk250/drawio-desktop/releases).
 
 **Can I use this app for free?** Yes, under the apache 2.0 license. If you don't change the code and accept it is provided "as-is", you can use it for any purpose.
 
 Windows installation
 --------------------
 
-Three flavours of Windows download are published on the [releases page](https://github.com/jgraph/drawio-desktop/releases):
+Three flavours of Windows download are published on the [releases page](https://github.com/pk250/drawio-desktop/releases):
 
 - `draw.io-<version>-windows-installer.exe` — NSIS installer. Installs **per-machine** into `Program Files` and **requires administrator privileges**.
 - `draw.io-<version>.msi` — MSI installer. Installs **per-user** into the user's profile and **does not require administrator privileges**. Use this one if you don't have admin rights on your machine.
@@ -39,7 +39,7 @@ Developing
 
 **draw.io** is a git submodule of **drawio-desktop**. To get both you need to clone recursively:
 
-`git clone --recursive https://github.com/jgraph/drawio-desktop.git`
+`git clone --recursive https://github.com/pk250/drawio-desktop.git`
 
 To run this:
 1. `npm install` (in the root directory of this repo)
@@ -53,7 +53,7 @@ To fork the project, make your own changes and build an (unsigned) app for perso
 To release:
 1. Update the draw.io sub-module and push the change. Add version tag before pushing to origin.
 2. Wait for the builds to complete (https://travis-ci.org/jgraph/drawio-desktop and https://ci.appveyor.com/project/davidjgraph/drawio-desktop)
-3. Go to https://github.com/jgraph/drawio-desktop/releases, edit the preview release.
+3. Go to https://github.com/pk250/drawio-desktop/releases, edit the preview release.
 4. Download the windows exe and windows portable, sign them using `signtool sign /a /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256 c:/path/to/your/file.exe`
 5. Re-upload signed file as `draw.io-windows-installer-x.y.z.exe` and `draw.io-windows-no-installer-x.y.z.exe`
 6. Add release notes
