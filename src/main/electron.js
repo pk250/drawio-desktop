@@ -1394,6 +1394,15 @@ app.whenReady().then(() =>
     	})
     }
 
+    // Resume the MCP HTTP server on startup if the user left it enabled.
+    if (store != null && store.get('mcpEnabled') === true && mcpService == null)
+    {
+        startMcpService().catch(e =>
+        {
+            console.error('Failed to start MCP server on startup:', e);
+        });
+    }
+
     let win = createWindow()
     
 	let loadEvtCount = 0;
@@ -1743,6 +1752,8 @@ if (isMac)
 {
 	app.on('before-quit', function() {
 		cmdQPressed = true;
+		// Stop the MCP HTTP server so the port is freed on exit.
+		stopMcpService().catch(e => console.error('Error stopping MCP server:', e));
 	});	
 }
 
@@ -3879,6 +3890,72 @@ function getLocalFonts()
 	});
 }
 
+// --- MCP server lifecycle (GUI mode) ---------------------------------------
+// The desktop GUI can host the MCP server over Streamable HTTP on a
+// configurable port. State (on/off + port) is persisted in electron-store and
+// surfaced to the renderer menu (MCP > Enable MCP Server / Configure MCP Port)
+// through the rendererReq IPC actions below: getMcpStatus, setMcpEnabled,
+// setMcpPort.
+
+const DEFAULT_MCP_PORT = 8890;
+let mcpService = null; // { server, httpServer } while the HTTP server runs
+
+function getMcpStatus()
+{
+	return {
+		enabled: store != null && store.get('mcpEnabled') === true,
+		port: store != null ? store.get('mcpPort') || DEFAULT_MCP_PORT : DEFAULT_MCP_PORT,
+		running: mcpService != null
+	};
+}
+
+async function startMcpService()
+{
+	if (mcpService != null)
+	{
+		return;
+	}
+
+	const port = getMcpStatus().port;
+
+	mcpService = await runMcpServer({
+		transport: 'http',
+		host: '127.0.0.1',
+		port: port,
+		appPath: app.getAppPath(),
+		version: app.getVersion()
+	});
+}
+
+async function stopMcpService()
+{
+	if (mcpService == null)
+	{
+		return;
+	}
+
+	const {server, httpServer} = mcpService;
+	mcpService = null;
+
+	try
+	{
+		httpServer?.close();
+	}
+	catch (e)
+	{
+		// ignore
+	}
+
+	try
+	{
+		await server.close();
+	}
+	catch (e)
+	{
+		// ignore
+	}
+}
+
 ipcMain.on("rendererReq", async (event, args) =>
 {
 	if (!validateSender(event.senderFrame)) return null;
@@ -3982,6 +4059,48 @@ ipcMain.on("rendererReq", async (event, args) =>
 			break;
 		case 'isFullscreen':
 			ret = BrowserWindow.getFocusedWindow()?.isFullScreen() ?? false;
+			break;
+		case 'getMcpStatus':
+			ret = getMcpStatus();
+			break;
+		case 'setMcpEnabled':
+			if (args.enabled === true)
+			{
+				await startMcpService();
+			}
+			else
+			{
+				await stopMcpService();
+			}
+
+			if (store != null)
+			{
+				store.set('mcpEnabled', args.enabled === true);
+			}
+
+			ret = getMcpStatus();
+			break;
+		case 'setMcpPort':
+			const newPort = parseInt(args.port, 10);
+
+			if (isNaN(newPort) || newPort < 1 || newPort > 65535)
+			{
+				throw new Error('invalid MCP port: ' + args.port);
+			}
+
+			if (store != null)
+			{
+				store.set('mcpPort', newPort);
+			}
+
+			// Restart the server on the new port if it is currently running.
+			if (mcpService != null)
+			{
+				await stopMcpService();
+				await startMcpService();
+			}
+
+			ret = getMcpStatus();
 			break;
 		};
 

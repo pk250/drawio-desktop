@@ -44,6 +44,9 @@ jobs:
       - name: Build portable x64
         run: |
           npm ci
+          # Injects the MCP menu into the bundled webapp's ElectronApp.js so
+          # the menu bar gets the MCP toggle/port items
+          node scripts/patch-mcp-menu.mjs
           # disableUpdate stops the app replacing itself with the official
           # (unmodified) release via auto-update
           npm run sync -- disableUpdate

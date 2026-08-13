@@ -25,6 +25,20 @@ drawio --mcp --mcp-transport http --mcp-port 8890
 drawio --mcp --mcp-readonly                 # read-only: every write tool is disabled
 ```
 
+### Enabling from the GUI (MCP menu)
+
+The desktop UI can also host the server over Streamable HTTP without any
+command-line flags. Use **Extras > MCP** (between *Extras* and *Help*):
+
+- **Enable / Disable MCP Server** — starts or stops the HTTP server on
+  `http://127.0.0.1:<port>/mcp`.
+- **Configure MCP Port…** — change the port (default `8890`); when the server
+  is running it is restarted on the new port.
+- A status line shows **Running / Stopped** plus the endpoint URL.
+
+The on/off state and port are persisted (via `electron-store`), so the server
+resumes automatically the next time the app starts if it was left enabled.
+
 Headless / development use (no Electron UI):
 
 ```
